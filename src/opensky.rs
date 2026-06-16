@@ -1,11 +1,13 @@
 use serde::Deserialize;
 
+use crate::model::Aircraft;
+
 #[derive(Debug, Deserialize)]
 pub struct OpenSkyResponse {
     pub states: Option<Vec<Vec<serde_json::Value>>>,
 }
 
-pub async fn fetch() -> anyhow::Result<OpenSkyResponse> {
+pub async fn fetch() -> anyhow::Result<Vec<Aircraft>> {
     let url = "https://opensky-network.org/api/states/all\
         ?lamin=-4.2\
         &lamax=-3.5\
@@ -16,5 +18,23 @@ pub async fn fetch() -> anyhow::Result<OpenSkyResponse> {
 
     let body = response.json::<OpenSkyResponse>().await?;
 
-    Ok(body)
+    let result = body
+        .states
+        .unwrap_or_default()
+        .into_iter()
+        .filter_map(|row| {
+            Some(Aircraft {
+                icao24: row.get(0)?.as_str()?.to_string(),
+                callsign: row
+                    .get(1)
+                    .and_then(|v| v.as_str())
+                    .map(str::trim)
+                    .map(String::from),
+                longitude: row.get(5)?.as_f64()?,
+                latitude: row.get(6)?.as_f64()?,
+            })
+        })
+        .collect();
+
+    Ok(result)
 }

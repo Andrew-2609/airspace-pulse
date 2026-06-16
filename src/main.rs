@@ -8,8 +8,19 @@ async fn main() -> anyhow::Result<()> {
     loop {
         match opensky::fetch().await {
             Ok(data) => {
-                let count = data.states.unwrap_or_default().len();
-                println!("Found {} aircraft", count)
+                let count = data.len();
+                println!("| Found {} aircraft {} |", count, " ".repeat(6));
+                println!("|{}|", "-".repeat(25));
+
+                for aircraft in data {
+                    println!(
+                        "| {:<10} | {:<10} |",
+                        aircraft.icao24,
+                        aircraft.callsign.unwrap_or_default()
+                    );
+                }
+
+                println!("{}", "-".repeat(27));
             }
             Err(err) => {
                 println!("Error: {}", err)
