@@ -1,6 +1,6 @@
 use tokio::time::{Duration, sleep};
 
-use crate::state::AircraftState;
+use crate::{model::Aircraft, state::AircraftState};
 
 mod model;
 mod opensky;
@@ -23,18 +23,17 @@ async fn main() -> anyhow::Result<()> {
                     current.insert(aircraft.icao24.clone(), aircraft.clone());
                 }
 
-                for (id, aircraft) in &current {
-                    let mut icao_str = String::new();
-                    if !previous.contains_key(id) {
-                        icao_str.push_str("ENTERED ");
-                    }
-                    icao_str.push_str(&aircraft.icao24);
-                    println!(
-                        "| {:^30} | {:^30} |",
-                        icao_str,
-                        aircraft.callsign.as_deref().unwrap_or_default()
-                    );
-                }
+                let (remained, entered): (Vec<&Aircraft>, Vec<&Aircraft>) = current
+                    .values()
+                    .partition(|ac| previous.contains_key(&ac.icao24));
+
+                let exited = previous
+                    .values()
+                    .filter(|ac| !current.contains_key(&ac.icao24));
+
+                display_aircraft(entered.into_iter(), "ENTERED");
+                display_aircraft(remained.into_iter(), "");
+                display_aircraft(exited, "EXITED");
 
                 previous = current;
             }
@@ -44,5 +43,25 @@ async fn main() -> anyhow::Result<()> {
         }
 
         sleep(Duration::from_secs(15)).await;
+    }
+}
+
+fn display_aircraft<'a>(aircraft: impl Iterator<Item = &'a Aircraft> + 'a, action: &str) {
+    let mut sorted: Vec<&Aircraft> = aircraft.collect();
+
+    sorted.sort_by(|a, b| a.icao24.cmp(&b.icao24));
+
+    for ac in sorted {
+        let message = if action.is_empty() {
+            ac.icao24.clone()
+        } else {
+            format!("{} {}", action, ac.icao24)
+        };
+
+        println!(
+            "| {:^30} | {:^30} |",
+            message,
+            ac.callsign.as_deref().unwrap_or_default()
+        )
     }
 }
