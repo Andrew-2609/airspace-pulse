@@ -1,7 +1,8 @@
 use tokio::time::{Duration, sleep};
 
-use crate::{model::Aircraft, state::AircraftState};
+use crate::{event::Event, state::AircraftState};
 
+mod event;
 mod model;
 mod opensky;
 mod state;
@@ -17,23 +18,17 @@ async fn main() -> anyhow::Result<()> {
             Ok(data) => {
                 let count = data.len();
                 let message = format!("Found {} aircraft {}", count, " ".repeat(6));
-                println!("\n{:^78}", message);
+                println!("\n{}", message);
 
                 for aircraft in data {
                     current.insert(aircraft.icao24.clone(), aircraft.clone());
                 }
 
-                let (remained, entered): (Vec<&Aircraft>, Vec<&Aircraft>) = current
-                    .values()
-                    .partition(|ac| previous.contains_key(&ac.icao24));
+                let events = detect_events(&previous, &current);
 
-                let exited = previous
-                    .values()
-                    .filter(|ac| !current.contains_key(&ac.icao24));
-
-                display_aircraft(entered.into_iter(), "ENTERED");
-                display_aircraft(remained.into_iter(), "");
-                display_aircraft(exited, "EXITED");
+                for event in events {
+                    println!("{:^30}", event);
+                }
 
                 previous = current;
             }
@@ -46,22 +41,28 @@ async fn main() -> anyhow::Result<()> {
     }
 }
 
-fn display_aircraft<'a>(aircraft: impl Iterator<Item = &'a Aircraft> + 'a, action: &str) {
-    let mut sorted: Vec<&Aircraft> = aircraft.collect();
+fn detect_events(previous: &AircraftState, current: &AircraftState) -> Vec<Event> {
+    let entered: Vec<Event> = current
+        .values()
+        .filter_map(|ac| {
+            if previous.contains_key(&ac.icao24) {
+                None
+            } else {
+                Some(Event::Entered(ac.icao24.clone()))
+            }
+        })
+        .collect();
 
-    sorted.sort_by(|a, b| a.icao24.cmp(&b.icao24));
+    let exited: Vec<Event> = previous
+        .values()
+        .filter_map(|ac| {
+            if current.contains_key(&ac.icao24) {
+                None
+            } else {
+                Some(Event::Left(ac.icao24.clone()))
+            }
+        })
+        .collect();
 
-    for ac in sorted {
-        let message = if action.is_empty() {
-            ac.icao24.clone()
-        } else {
-            format!("{} {}", action, ac.icao24)
-        };
-
-        println!(
-            "| {:^30} | {:^30} |",
-            message,
-            ac.callsign.as_deref().unwrap_or_default()
-        )
-    }
+    entered.iter().chain(exited.iter()).cloned().collect()
 }
