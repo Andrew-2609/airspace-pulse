@@ -1,16 +1,37 @@
-use std::fmt::Display;
+use serde::{Serialize, ser::SerializeStruct};
+
+use crate::model::Aircraft;
 
 #[derive(Clone)]
-pub enum Event {
-    Entered(String),
-    Left(String),
+pub enum AircraftEvent {
+    Entered(Aircraft),
+    Left(Aircraft),
 }
 
-impl Display for Event {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl AircraftEvent {
+    fn action(&self) -> &str {
         match self {
-            Event::Entered(icao24) => write!(f, "{} entered the airspace", icao24),
-            Event::Left(icao24) => write!(f, "{} left the airspace", icao24),
+            Self::Entered(_) => "entered",
+            Self::Left(_) => "left",
+        }
+    }
+}
+
+impl Serialize for AircraftEvent {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match self {
+            AircraftEvent::Entered(ac) | AircraftEvent::Left(ac) => {
+                let mut state = serializer.serialize_struct("AircraftEvent", 5)?;
+                state.serialize_field("action", self.action())?;
+                state.serialize_field("icao24", &ac.icao24)?;
+                state.serialize_field("callsign", ac.callsign.as_deref().unwrap_or_default())?;
+                state.serialize_field("latitude", &ac.latitude)?;
+                state.serialize_field("longitude", &ac.longitude)?;
+                state.end()
+            }
         }
     }
 }

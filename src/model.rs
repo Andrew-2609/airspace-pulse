@@ -1,6 +1,6 @@
-use serde::Deserialize;
+use serde::Serialize;
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Serialize)]
 pub struct Aircraft {
     pub icao24: String,
     pub callsign: Option<String>,
