@@ -1,9 +1,6 @@
-use std::convert::Infallible;
 
 use axum::{
     Router,
-    extract::State,
-    response::sse::{Event as SseEvent, Sse},
     routing::get,
 };
 use tokio::{
@@ -12,19 +9,14 @@ use tokio::{
     time::{Duration, sleep},
     try_join,
 };
-use tokio_stream::StreamExt;
 
-use crate::{event::AircraftEvent, state::AircraftState};
+use crate::{api::{AppState, events_handler, health}, event::AircraftEvent, state::AircraftState};
 
+mod api;
 mod event;
 mod model;
 mod opensky;
 mod state;
-
-#[derive(Clone)]
-struct AppState {
-    sender: Sender<AircraftEvent>,
-}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -53,31 +45,6 @@ async fn main() -> anyhow::Result<()> {
         Ok(_) => Ok(()),
         Err(err) => Err(err.into()),
     }
-}
-
-async fn health() -> &'static str {
-    "OK"
-}
-
-async fn events_handler(
-    State(state): State<AppState>,
-) -> Sse<impl tokio_stream::Stream<Item = Result<SseEvent, Infallible>>> {
-    let receiver = state.sender.subscribe();
-    let stream = tokio_stream::wrappers::BroadcastStream::new(receiver);
-
-    let mapped_stream = stream.filter_map(|result| match result {
-        Ok(event) => {
-            let sse_event = SseEvent::default().json_data(event).unwrap_or_default();
-            Some(Ok::<_, Infallible>(sse_event))
-        }
-        Err(_) => None,
-    });
-
-    Sse::new(mapped_stream).keep_alive(
-        axum::response::sse::KeepAlive::new()
-            .interval(std::time::Duration::from_secs(15))
-            .text("heartbeat"),
-    )
 }
 
 async fn run_poller(sender: Sender<AircraftEvent>) -> anyhow::Result<()> {

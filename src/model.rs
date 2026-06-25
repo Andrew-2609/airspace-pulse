@@ -4,10 +4,15 @@ use serde::Serialize;
 pub struct Aircraft {
     pub icao24: String,
     pub callsign: Option<String>,
-    pub latitude: f64,
-    pub longitude: f64,
+    pub position: Position,
     pub on_ground: bool,
     pub category: AircraftCategory,
+}
+
+#[derive(Clone, Serialize)]
+pub struct Position {
+    pub lat: f64,
+    pub lon: f64,
 }
 
 #[derive(Clone)]

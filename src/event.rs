@@ -1,6 +1,6 @@
 use serde::{Serialize, ser::SerializeStruct};
 
-use crate::model::Aircraft;
+use crate::model::{Aircraft, Position};
 
 #[derive(Clone)]
 pub enum AircraftEvent {
@@ -17,6 +17,14 @@ impl AircraftEvent {
             Self::Left(_) => "left",
             Self::Landed(_) => "landed",
             Self::TookOff(_) => "took_off",
+        }
+    }
+
+    pub fn aircraft_position(&self) -> &Position {
+        match self {
+            Self::Entered(ac) | Self::Left(ac) | Self::Landed(ac) | Self::TookOff(ac) => {
+                &ac.position
+            }
         }
     }
 }
@@ -36,8 +44,8 @@ impl Serialize for AircraftEvent {
                 state.serialize_field("action", self.action())?;
                 state.serialize_field("icao24", &ac.icao24)?;
                 state.serialize_field("callsign", ac.callsign.as_deref().unwrap_or_default())?;
-                state.serialize_field("latitude", &ac.latitude)?;
-                state.serialize_field("longitude", &ac.longitude)?;
+                state.serialize_field("latitude", &ac.position.lat)?;
+                state.serialize_field("longitude", &ac.position.lon)?;
                 state.serialize_field("category", &ac.category)?;
                 state.end()
             }
