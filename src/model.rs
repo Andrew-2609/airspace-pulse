@@ -6,4 +6,5 @@ pub struct Aircraft {
     pub callsign: Option<String>,
     pub latitude: f64,
     pub longitude: f64,
+    pub on_ground: bool,
 }

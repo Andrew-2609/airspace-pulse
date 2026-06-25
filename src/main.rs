@@ -116,27 +116,30 @@ async fn run_poller(sender: Sender<AircraftEvent>) -> anyhow::Result<()> {
 }
 
 fn detect_events(previous: &AircraftState, current: &AircraftState) -> Vec<AircraftEvent> {
-    let entered: Vec<AircraftEvent> = current
-        .values()
-        .filter_map(|ac| {
-            if previous.contains_key(&ac.icao24) {
-                None
-            } else {
-                Some(AircraftEvent::Entered(ac.clone()))
-            }
-        })
-        .collect();
+    let mut result: Vec<AircraftEvent> = Vec::new();
 
-    let exited: Vec<AircraftEvent> = previous
-        .values()
-        .filter_map(|ac| {
-            if current.contains_key(&ac.icao24) {
-                None
-            } else {
-                Some(AircraftEvent::Left(ac.clone()))
+    for (_, cur) in current {
+        match previous.get(&cur.icao24) {
+            None => {
+                result.push(AircraftEvent::Entered(cur.clone()));
             }
-        })
-        .collect();
+            Some(prev) => match (prev.on_ground, cur.on_ground) {
+                (false, true) => {
+                    result.push(AircraftEvent::Landed(cur.clone()));
+                }
+                (true, false) => {
+                    result.push(AircraftEvent::TookOff(cur.clone()));
+                }
+                _ => {}
+            },
+        }
+    }
 
-    entered.iter().chain(exited.iter()).cloned().collect()
+    for (_, ac) in previous {
+        if !current.contains_key(&ac.icao24) {
+            result.push(AircraftEvent::Left(ac.clone()));
+        }
+    }
+
+    result
 }

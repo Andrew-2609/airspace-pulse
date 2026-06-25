@@ -32,6 +32,7 @@ pub async fn fetch() -> anyhow::Result<Vec<Aircraft>> {
                     .map(String::from),
                 longitude: row.get(5)?.as_f64()?,
                 latitude: row.get(6)?.as_f64()?,
+                on_ground: row.get(8)?.as_bool()?,
             })
         })
         .collect();

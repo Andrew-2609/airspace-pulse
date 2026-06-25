@@ -6,6 +6,8 @@ use crate::model::Aircraft;
 pub enum AircraftEvent {
     Entered(Aircraft),
     Left(Aircraft),
+    Landed(Aircraft),
+    TookOff(Aircraft),
 }
 
 impl AircraftEvent {
@@ -13,6 +15,8 @@ impl AircraftEvent {
         match self {
             Self::Entered(_) => "entered",
             Self::Left(_) => "left",
+            Self::Landed(_) => "landed",
+            Self::TookOff(_) => "took_off",
         }
     }
 }
@@ -23,7 +27,10 @@ impl Serialize for AircraftEvent {
         S: serde::Serializer,
     {
         match self {
-            AircraftEvent::Entered(ac) | AircraftEvent::Left(ac) => {
+            AircraftEvent::Entered(ac)
+            | AircraftEvent::Left(ac)
+            | AircraftEvent::Landed(ac)
+            | AircraftEvent::TookOff(ac) => {
                 let mut state = serializer.serialize_struct("AircraftEvent", 5)?;
                 state.serialize_field("action", self.action())?;
                 state.serialize_field("icao24", &ac.icao24)?;
