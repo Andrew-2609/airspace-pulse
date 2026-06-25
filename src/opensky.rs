@@ -9,10 +9,10 @@ pub struct OpenSkyResponse {
 
 pub async fn fetch() -> anyhow::Result<Vec<Aircraft>> {
     let url = "https://opensky-network.org/api/states/all\
-        ?lamin=-4.2\
-        &lamax=-3.5\
-        &lomin=-38.9\
-        &lomax=-38.2\
+        ?lamin=-33.8694284\
+        &lamax=5.2695808\
+        &lomin=-73.9830625\
+        &lomax=-28.6289646\
         &extended=1";
 
     let response = reqwest::get(url).await?;
