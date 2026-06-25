@@ -31,12 +31,14 @@ impl Serialize for AircraftEvent {
             | AircraftEvent::Left(ac)
             | AircraftEvent::Landed(ac)
             | AircraftEvent::TookOff(ac) => {
-                let mut state = serializer.serialize_struct("AircraftEvent", 5)?;
+                // Important: increase the state len if new fields are added
+                let mut state = serializer.serialize_struct("AircraftEvent", 6)?;
                 state.serialize_field("action", self.action())?;
                 state.serialize_field("icao24", &ac.icao24)?;
                 state.serialize_field("callsign", ac.callsign.as_deref().unwrap_or_default())?;
                 state.serialize_field("latitude", &ac.latitude)?;
                 state.serialize_field("longitude", &ac.longitude)?;
+                state.serialize_field("category", &ac.category)?;
                 state.end()
             }
         }

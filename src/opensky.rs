@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::model::Aircraft;
+use crate::model::{Aircraft, AircraftCategory};
 
 #[derive(Debug, Deserialize)]
 pub struct OpenSkyResponse {
@@ -12,7 +12,8 @@ pub async fn fetch() -> anyhow::Result<Vec<Aircraft>> {
         ?lamin=-4.2\
         &lamax=-3.5\
         &lomin=-38.9\
-        &lomax=-38.2";
+        &lomax=-38.2\
+        &extended=1";
 
     let response = reqwest::get(url).await?;
 
@@ -33,6 +34,12 @@ pub async fn fetch() -> anyhow::Result<Vec<Aircraft>> {
                 longitude: row.get(5)?.as_f64()?,
                 latitude: row.get(6)?.as_f64()?,
                 on_ground: row.get(8)?.as_bool()?,
+
+                category: row
+                    .get(17)
+                    .and_then(|v| v.as_u64())
+                    .map(AircraftCategory::from)
+                    .unwrap_or(AircraftCategory::NoInfo),
             })
         })
         .collect();
