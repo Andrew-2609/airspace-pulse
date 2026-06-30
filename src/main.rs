@@ -1,8 +1,4 @@
-
-use axum::{
-    Router,
-    routing::get,
-};
+use axum::{Router, routing::get};
 use tokio::{
     net::TcpListener,
     sync::broadcast::{self, Sender},
@@ -10,13 +6,19 @@ use tokio::{
     try_join,
 };
 
-use crate::{api::{AppState, events_handler, health}, event::AircraftEvent, state::AircraftState};
+use crate::{
+    api::{AppState, events_handler, health},
+    event::AircraftEvent,
+    state::AircraftState,
+};
 
 mod api;
 mod event;
 mod model;
 mod opensky;
 mod state;
+
+const POLL_INTERVAL: u64 = 22;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -78,7 +80,7 @@ async fn run_poller(sender: Sender<AircraftEvent>) -> anyhow::Result<()> {
             }
         }
 
-        sleep(Duration::from_secs(15)).await;
+        sleep(Duration::from_secs(POLL_INTERVAL)).await;
     }
 }
 
@@ -103,8 +105,9 @@ fn detect_events(previous: &AircraftState, current: &AircraftState) -> Vec<Aircr
     }
 
     for (_, ac) in previous {
-        if !current.contains_key(&ac.icao24) {
-            result.push(AircraftEvent::Left(ac.clone()));
+        match current.contains_key(&ac.icao24) {
+            true => result.push(AircraftEvent::Present(ac.clone())),
+            false => result.push(AircraftEvent::Left(ac.clone())),
         }
     }
 
