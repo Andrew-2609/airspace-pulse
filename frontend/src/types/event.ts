@@ -6,7 +6,8 @@ export type AircraftAction =
   | "entered"
   | "left"
   | "landed"
-  | "took_off";
+  | "took_off"
+  | "changed_address";
 
 export type AircraftCategory =
   | "noInfo"
@@ -39,6 +40,12 @@ export interface AircraftEvent {
   city: string;
   state: string;
   country: string;
+  // Present only on `changed_address` events — the previous address before the
+  // aircraft crossed into a new reverse-geocoded cell. Absent on every other
+  // action.
+  prev_city?: string;
+  prev_state?: string;
+  prev_country?: string;
 }
 
 export type SseStatus = "idle" | "connecting" | "connected" | "disconnected";

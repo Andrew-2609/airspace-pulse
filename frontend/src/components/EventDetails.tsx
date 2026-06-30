@@ -8,6 +8,7 @@ import {
   Tag,
   Compass,
   MapPin,
+  ArrowRight,
   type LucideIcon,
 } from "lucide-react";
 import type { ReceivedEvent } from "@/hooks/useAirspaceStore";
@@ -75,6 +76,8 @@ export function EventDetails({ event }: EventDetailsProps) {
 
       <WhatHappenedCard action={event.action} Icon={SummaryIcon} />
 
+      {event.action === "changed_address" && <AddressTransitionCard event={event} />}
+
       {devMode && <DevDetails event={event} />}
     </motion.div>
   );
@@ -113,6 +116,7 @@ function WhatHappenedCard({
     left: "Esta aeronave deixou a área monitorada. Pode ainda estar no ar em outro lugar — apenas não mais dentro da sua zona.",
     landed: "Esta aeronave estava no ar e acabou de tocar o solo dentro da área monitorada.",
     took_off: "Esta aeronave estava no solo e acabou de decolar — agora está no ar dentro da área monitorada.",
+    changed_address: "Esta aeronave cruzou de uma área de endereço para outra — veja o antes e depois abaixo.",
   };
   return (
     <Card className="p-4">
@@ -123,6 +127,35 @@ function WhatHappenedCard({
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">O que aconteceu</p>
           <p className="mt-1 text-sm leading-relaxed text-foreground/90">{copy[action]}</p>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function AddressTransitionCard({ event }: { event: ReceivedEvent }) {
+  const prev = [event.prev_city, event.prev_state, event.prev_country].filter(Boolean).join(", ");
+  const next = [event.city, event.state, event.country].filter(Boolean).join(", ");
+
+  return (
+    <Card className="overflow-hidden">
+      <header className="border-b border-border bg-muted/40 px-4 py-2.5">
+        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <MapPin className="h-3.5 w-3.5" />
+          Mudança de local
+        </p>
+      </header>
+      <div className="grid grid-cols-1 items-stretch gap-px bg-border sm:grid-cols-[1fr_auto_1fr]">
+        <div className="bg-card p-3">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Antes</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{prev || "Localização desconhecida"}</p>
+        </div>
+        <div className="flex items-center justify-center bg-card px-3 py-2 sm:py-0">
+          <ArrowRight className="h-4 w-4 text-accent" />
+        </div>
+        <div className="bg-card p-3">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-accent">Depois</p>
+          <p className="mt-0.5 text-sm font-medium">{next || "Localização desconhecida"}</p>
         </div>
       </div>
     </Card>

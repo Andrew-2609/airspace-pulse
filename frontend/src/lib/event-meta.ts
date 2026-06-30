@@ -4,6 +4,7 @@ import {
   PlaneLanding,
   LogOut,
   Radio,
+  MapPin,
   type LucideIcon,
 } from "lucide-react";
 import type { AircraftAction } from "@/types/event";
@@ -50,6 +51,12 @@ export const EVENT_META: Record<AircraftAction, EventMeta> = {
     title: (c, i) => c ? `${c} decolou` : `Aeronave ${i} decolou`,
     description: "Decolou e está no ar dentro da área monitorada",
     accent: "warning",
+  },
+  changed_address: {
+    Icon: MapPin,
+    title: (c, i) => c ? `${c} mudou de local` : `Aeronave ${i} mudou de local`,
+    description: "Aeronave cruzou para uma nova área de endereço",
+    accent: "accent",
   },
 };
 

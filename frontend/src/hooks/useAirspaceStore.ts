@@ -240,6 +240,20 @@ class AirspaceStore {
         timelineMutated = this.pushRecent(stamped);
         break;
       }
+      case "changed_address": {
+        // Aircraft moved into a new reverse-geocoded cell. Update the envelope
+        // (fresh coordinates + new address) and record as a transition so the
+        // status pill reflects recent activity. Always pushed to the timeline
+        // — these are meaningful, infrequent events worth surfacing.
+        this.aircraftMap.set(event.icao24, {
+          event: stamped,
+          lastTransitionAt: now,
+          lastTransitionAction: "changed_address" as TransitionAction,
+        });
+        mapMutated = true;
+        timelineMutated = this.pushRecent(stamped);
+        break;
+      }
       default:
         // Unknown action — ignore defensively.
         return;

@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ArrowRight } from "lucide-react";
 import type { ReceivedEvent } from "@/hooks/useAirspaceStore";
 import { EVENT_META, ACCENT_CLASSES } from "@/lib/event-meta";
 import { friendlyTitle, friendlySubtitle, friendlyCategory } from "@/lib/event-display";
@@ -79,6 +80,17 @@ export function EventCard({ event, selected, onSelect }: EventCardProps) {
                 </>
               )}
             </div>
+            {event.action === "changed_address" && (
+              <div className="mt-2 flex items-center gap-1.5 rounded-md bg-accent/5 px-2 py-1 text-[11px]">
+                <span className="truncate text-muted-foreground">
+                  {event.prev_city || "—"}
+                </span>
+                <ArrowRight className="h-3 w-3 shrink-0 text-accent" />
+                <span className="truncate font-medium text-accent">
+                  {event.city || "—"}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </Card>

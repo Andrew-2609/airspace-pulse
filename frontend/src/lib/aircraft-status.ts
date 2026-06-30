@@ -54,5 +54,8 @@ function transitionStatus(action: TransitionAction, elapsedMs: number, onGround:
     case "left":
       // Should not occur — Left removes the aircraft from the map.
       return "em-voo";
+    case "changed_address":
+      // Address changes don't affect flight status — defer to on_ground.
+      return onGround ? "pousado" : "em-voo";
   }
 }

@@ -16,6 +16,8 @@ export function friendlyTitle(action: AircraftAction, callsign?: string): string
       return `${subject} pousou`;
     case "took_off":
       return `${subject} decolou`;
+    case "changed_address":
+      return `${subject} mudou de local`;
     default:
       return subject;
   }
@@ -34,6 +36,8 @@ export function friendlySubtitle(action: AircraftAction): string {
       return "Tocou o solo";
     case "took_off":
       return "Decolou e está no ar";
+    case "changed_address":
+      return "Cruzou para uma nova área de endereço";
     default:
       return "";
   }
