@@ -1,83 +1,69 @@
 import { AnimatePresence } from "framer-motion";
 import { Radio, Loader2 } from "lucide-react";
-import type { AircraftEvent, SseStatus } from "@/types/event";
-import type { ReceivedEvent } from "@/hooks/useEventStream";
+import type { SseStatus } from "@/types/event";
+import type { ReceivedEvent } from "@/hooks/useAirspaceStore";
 import { EventCard } from "./EventCard";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 interface EventFeedProps {
   events: ReceivedEvent[];
   status: SseStatus;
-  hasCity: boolean;
-  loadingResults: boolean;
   selectedIcao?: string;
   onSelect: (event: ReceivedEvent) => void;
 }
 
-export function EventFeed({
-  events,
-  status,
-  hasCity,
-  loadingResults,
-  selectedIcao,
-  onSelect,
-}: EventFeedProps) {
+export function EventFeed({ events, status, selectedIcao, onSelect }: EventFeedProps) {
   const empty = events.length === 0;
 
-  if (loadingResults) {
-    return (
-      <FeedShell title="Event Feed">
-        <div className="space-y-2">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-20 w-full rounded-lg" />
-          ))}
-        </div>
-      </FeedShell>
-    );
-  }
-
-  if (!hasCity) {
-    return (
-      <FeedShell title="Event Feed">
-        <EmptyState
-          Icon={Radio}
-          title="No city selected"
-          body="Search for a Brazilian city to begin monitoring airspace activity."
-        />
-      </FeedShell>
-    );
-  }
-
   if (empty) {
-    const listening = status === "connected" || status === "connecting";
-    const idle = status === "idle";
-    if (idle) {
+    if (status === "connecting") {
       return (
-        <FeedShell title="Event Feed">
+        <FeedShell title="Eventos">
+          <EmptyState
+            Icon={Loader2}
+            spin
+            title="Conectando ao monitoramento do espaço aéreo cearense…"
+            body="Os eventos aparecerão aqui assim que a conexão for estabelecida."
+          />
+        </FeedShell>
+      );
+    }
+    if (status === "connected") {
+      return (
+        <FeedShell title="Eventos">
           <EmptyState
             Icon={Radio}
-            title="No city selected"
-            body="Search for a Brazilian city to begin monitoring airspace activity."
+            title="Aguardando atividade aérea…"
+            body="Os eventos aparecerão aqui assim que aeronaves entrarem, saírem, pousarem ou decolarem na área monitorada."
+          />
+        </FeedShell>
+      );
+    }
+    if (status === "disconnected") {
+      return (
+        <FeedShell title="Eventos">
+          <EmptyState
+            Icon={Radio}
+            title="Conexão perdida"
+            body="Tentando reconectar automaticamente ao monitoramento do espaço aéreo cearense."
           />
         </FeedShell>
       );
     }
     return (
-      <FeedShell title="Event Feed">
+      <FeedShell title="Eventos">
         <EmptyState
-          Icon={listening ? Loader2 : Radio}
-          spin={listening}
-          title={listening ? "Listening for airspace activity…" : "Waiting to connect"}
-          body={listening ? "Events will appear here the moment aircraft enter, leave, land, or take off inside the monitored area." : "The connection is currently down. We'll retry automatically."}
+          Icon={Radio}
+          title="Monitoramento aguardando início"
+          body="A conexão começará em instantes."
         />
       </FeedShell>
     );
   }
 
   return (
-    <FeedShell title="Event Feed" count={events.length}>
+    <FeedShell title="Eventos" count={events.length}>
       <div className="space-y-2">
         <AnimatePresence initial={false}>
           {events.map((ev) => (
@@ -108,7 +94,7 @@ function FeedShell({
       <header className="mb-3 flex items-center justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{title}</h2>
         {typeof count === "number" && (
-          <span className="font-mono text-xs text-muted-foreground tabular-nums">{count} event{count === 1 ? "" : "s"}</span>
+          <span className="font-mono text-xs text-muted-foreground tabular-nums">{count} evento{count === 1 ? "" : "s"}</span>
         )}
       </header>
       <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin pr-1">{children}</div>
@@ -141,4 +127,4 @@ function EmptyState({
 }
 
 // Re-export for clarity when used elsewhere
-export type { AircraftEvent, ReceivedEvent };
+export type { ReceivedEvent };

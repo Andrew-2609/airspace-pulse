@@ -1,27 +1,32 @@
 import { useCallback, useState } from "react";
 import { AlertCircle } from "lucide-react";
-import { SelectedCityCard } from "./SelectedCityCard";
+import { MetricsRow } from "./MetricsRow";
+import { ActiveAircraft } from "./ActiveAircraft";
 import { EventFeed } from "./EventFeed";
 import { EventDetails } from "./EventDetails";
-import type { ReceivedEvent } from "@/hooks/useEventStream";
+import type { ReceivedEvent } from "@/hooks/useAirspaceStore";
+import type {
+  ActiveAircraft as ActiveAircraftType,
+  AirspaceMetrics,
+  SseStatus,
+} from "@/types/event";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import type { CityResult, SseStatus } from "@/types/event";
 
 interface MonitoringViewProps {
-  city: CityResult;
   status: SseStatus;
+  aircraft: ActiveAircraftType[];
+  metrics: AirspaceMetrics;
   events: ReceivedEvent[];
   lastError: string | null;
-  onChangeCity: () => void;
   onOpenMobileDetails: (event: ReceivedEvent) => void;
 }
 
 export function MonitoringView({
-  city,
   status,
+  aircraft,
+  metrics,
   events,
   lastError,
-  onChangeCity,
   onOpenMobileDetails,
 }: MonitoringViewProps) {
   const [selectedEvent, setSelectedEvent] = useState<ReceivedEvent | null>(null);
@@ -49,31 +54,33 @@ export function MonitoringView({
           </div>
         </div>
       )}
-      <main className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-6 p-4 sm:p-6 lg:flex-row lg:gap-6">
-        <aside className="lg:w-[340px] lg:shrink-0">
-          <SelectedCityCard city={city} status={status} onClear={onChangeCity} />
-        </aside>
+      <main className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-4 p-4 sm:gap-6 sm:p-6">
+        <MetricsRow metrics={metrics} />
 
-        <section className="flex min-h-[50vh] flex-1 flex-col lg:min-h-0">
-          <EventFeed
-            events={events}
-            status={status}
-            hasCity
-            loadingResults={false}
-            selectedIcao={selectedEvent?.icao24}
-            onSelect={handleSelectEvent}
-          />
-        </section>
+        <div className="grid gap-4 lg:grid-cols-[1fr_340px] lg:gap-6">
+          <section className="flex min-h-[50vh] flex-col lg:min-h-0">
+            <ActiveAircraft aircraft={aircraft} status={status} />
+          </section>
 
-        <section className="hidden lg:block lg:w-[360px] lg:shrink-0">
+          <section className="flex min-h-[40vh] flex-col lg:min-h-0">
+            <EventFeed
+              events={events}
+              status={status}
+              selectedIcao={selectedEvent?.icao24}
+              onSelect={handleSelectEvent}
+            />
+          </section>
+        </div>
+
+        <section className="hidden lg:block">
           {selectedEvent ? (
-            <div className="space-y-4">
+            <div className="space-y-3">
               <header>
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                  Event details
+                  Detalhes do evento
                 </h2>
                 <p className="mt-0.5 text-xs text-muted-foreground/80">
-                  A summary of what just happened.
+                  Um resumo do que acabou de acontecer.
                 </p>
               </header>
               <EventDetails event={selectedEvent} />
@@ -82,6 +89,10 @@ export function MonitoringView({
             <EmptyDetails />
           )}
         </section>
+
+        <p className="text-center text-[10px] text-muted-foreground/70">
+          Aviso: as informações de cidade/estado/país aparecem sem acentos devido a limitações do conjunto de dados.
+        </p>
       </main>
     </>
   );
@@ -90,9 +101,9 @@ export function MonitoringView({
 function EmptyDetails() {
   return (
     <div className="rounded-lg border border-dashed border-border p-8 text-center">
-      <p className="text-sm font-medium">No event selected yet</p>
+      <p className="text-sm font-medium">Nenhum evento selecionado</p>
       <p className="mt-1 text-xs text-muted-foreground">
-        Tap an event in the feed to see what happened.
+        Toque em um evento na lista para ver o que aconteceu.
       </p>
     </div>
   );

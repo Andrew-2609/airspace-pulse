@@ -4,36 +4,49 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 222 32% 14%;
+    /* Paleta Ceará — céu, serra, sol, sertão
+       primary  → céu atlântico       #1F77D0
+       accent   → verde serra         #2D7D5A  (Baturité / Ibiapaba)
+       secondary→ terracota sertão    #C26A2C  (interior semiárido)
+       warning  → sol nordestino      #E3A82B
+       success  → verde serra         #2D7D5A  (mesma da serra)
+       destructive → vermelho alerta  #C4332A */
+    --background: 42 36% 95%;
+    --foreground: 28 30% 14%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 32% 14%;
+    --card: 42 26% 99%;
+    --card-foreground: 28 30% 14%;
 
-    --muted: 210 16% 96%;
-    --muted-foreground: 215 16% 52%;
+    --muted: 42 22% 90%;
+    --muted-foreground: 32 14% 44%;
 
-    --accent: 210 16% 95%;
-    --accent-foreground: 222 32% 14%;
+    --accent: 152 47% 33%;
+    --accent-foreground: 0 0% 100%;
 
-    --primary: 210 92% 52%;
+    --primary: 207 75% 47%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 16% 93%;
-    --secondary-foreground: 222 32% 14%;
+    --secondary: 22 70% 47%;
+    --secondary-foreground: 0 0% 100%;
 
-    --success: 142 64% 38%;
+    --success: 152 47% 33%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    --warning: 38 78% 53%;
+    --warning-foreground: 28 50% 12%;
 
-    --destructive: 0 84% 56%;
+    --destructive: 8 65% 47%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 18% 90%;
-    --input: 214 18% 90%;
-    --ring: 210 92% 52%;
+    --border: 38 22% 86%;
+    --input: 38 22% 86%;
+    --ring: 207 75% 47%;
+
+    /* Tons de marca para gradientes e faixas */
+    --brand-sky: 207 75% 47%;
+    --brand-serra: 152 47% 33%;
+    --brand-sun: 38 78% 53%;
+    --brand-sertao: 22 70% 47%;
 
     --radius: 0.625rem;
   }

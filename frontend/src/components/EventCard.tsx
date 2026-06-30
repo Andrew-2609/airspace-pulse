@@ -1,7 +1,6 @@
-import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import type { ReceivedEvent } from "@/hooks/useEventStream";
+import type { ReceivedEvent } from "@/hooks/useAirspaceStore";
 import { EVENT_META, ACCENT_CLASSES } from "@/lib/event-meta";
 import { friendlyTitle, friendlySubtitle, friendlyCategory } from "@/lib/event-display";
 import { useDevMode } from "@/hooks/useDevMode";
@@ -21,14 +20,11 @@ export function EventCard({ event, selected, onSelect }: EventCardProps) {
   const { devMode } = useDevMode();
 
   return (
-    <motion.button
+    <button
       type="button"
       onClick={() => onSelect?.(event)}
-      layout
-      initial={{ opacity: 0, y: -8, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ type: "spring", stiffness: 500, damping: 34 }}
-      className="block w-full text-left"
+      aria-pressed={selected}
+      className="block w-full text-left transition-transform active:scale-[0.99]"
     >
       <Card
         className={cn(
@@ -60,11 +56,14 @@ export function EventCard({ event, selected, onSelect }: EventCardProps) {
                 </Badge>
               ) : (
                 <Badge variant="outline" className="px-2 py-0 text-[10px] text-muted-foreground">
-                  Unknown flight
+                  Voo desconhecido
                 </Badge>
               )}
               <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium", accent.bg, accent.text)}>
                 {friendlyCategory(event.category)}
+              </span>
+              <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium", event.on_ground ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary")}>
+                {event.on_ground ? "No solo" : "Em voo"}
               </span>
               {devMode && (
                 <>
@@ -83,6 +82,6 @@ export function EventCard({ event, selected, onSelect }: EventCardProps) {
           </div>
         </div>
       </Card>
-    </motion.button>
+    </button>
   );
 }

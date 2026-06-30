@@ -5,11 +5,11 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import type { AircraftEvent } from "@/types/event";
+import type { ReceivedEvent } from "@/hooks/useAirspaceStore";
 import { EventDetails } from "./EventDetails";
 
 interface EventDetailsSheetProps {
-  event: (AircraftEvent & { _receivedAt: number }) | null;
+  event: ReceivedEvent | null;
   onOpenChange: (open: boolean) => void;
 }
 
@@ -18,8 +18,8 @@ export function EventDetailsSheet({ event, onOpenChange }: EventDetailsSheetProp
     <Sheet open={!!event} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto scrollbar-thin">
         <SheetHeader className="mb-3">
-          <SheetTitle>What happened</SheetTitle>
-          <SheetDescription>A plain-English summary of this event.</SheetDescription>
+          <SheetTitle>O que aconteceu</SheetTitle>
+          <SheetDescription>Um resumo em linguagem simples deste evento.</SheetDescription>
         </SheetHeader>
         {event && <EventDetails event={event} />}
       </SheetContent>

@@ -1,7 +1,12 @@
 // Types mirror the backend Serialize impl in airspace-pulse/src/event.rs
 // and model.rs. Do not invent fields.
 
-export type AircraftAction = "entered" | "left" | "landed" | "took_off";
+export type AircraftAction =
+  | "present"
+  | "entered"
+  | "left"
+  | "landed"
+  | "took_off";
 
 export type AircraftCategory =
   | "noInfo"
@@ -27,23 +32,38 @@ export interface AircraftEvent {
   latitude: number;
   longitude: number;
   category: AircraftCategory;
+  on_ground: boolean;
+  // Backend reverses geocode (lat, lon) via a local geocoder. The underlying
+  // dataset strips diacritics, so city/state/country values arrive unaccented
+  // (e.g. "Sao Paulo" instead of "São Paulo"). Display as-is.
+  city: string;
+  state: string;
+  country: string;
 }
 
 export type SseStatus = "idle" | "connecting" | "connected" | "disconnected";
 
-export interface BoundingBox {
-  lamin: number;
-  lamax: number;
-  lomin: number;
-  lomax: number;
+// Lifecycle transitions tracked client-side for status derivation.
+// Present is a discovery event, not a transition — excluded from this union.
+export type TransitionAction = Exclude<AircraftAction, "present">;
+
+export type AircraftStatus =
+  | "em-voo"
+  | "pousado"
+  | "decolando"
+  | "recem-pousado"
+  | "recem-decolado";
+
+export interface ActiveAircraft {
+  // event is the raw backend envelope plus a client-stamped _receivedAt.
+  event: AircraftEvent & { _receivedAt: number };
+  lastTransitionAt: number | null;
+  lastTransitionAction: TransitionAction | null;
 }
 
-export interface CityResult {
-  place_id: number;
-  lat: string;
-  lon: string;
-  display_name: string;
-  name: string;
-  addresstype: string;
-  boundingbox: [string, string, string, string];
+export interface AirspaceMetrics {
+  active: number;
+  takeoffs: number;
+  landings: number;
+  recentEvents: number;
 }

@@ -1,41 +1,45 @@
 import type { AircraftAction, AircraftCategory } from "@/types/event";
 import { categoryMeta } from "@/lib/categories";
 
-// Friendly title — what a 15-year-old would understand.
-// Returns e.g. "Flight LATAM123 entered the area" or "An aircraft entered the area".
+// Título amigável — o que um adolescente de 15 anos entenderia.
+// Ex.: "Voo LATAM123 entrou na área" ou "Uma aeronave entrou na área".
 export function friendlyTitle(action: AircraftAction, callsign?: string): string {
-  const subject = callsign ? `Flight ${callsign}` : "An aircraft";
+  const subject = callsign ? `Voo ${callsign}` : "Uma aeronave";
   switch (action) {
+    case "present":
+      return `${subject} está na área`;
     case "entered":
-      return `${subject} entered the area`;
+      return `${subject} entrou na área`;
     case "left":
-      return `${subject} left the area`;
+      return `${subject} saiu da área`;
     case "landed":
-      return `${subject} landed`;
+      return `${subject} pousou`;
     case "took_off":
-      return `${subject} took off`;
+      return `${subject} decolou`;
     default:
       return subject;
   }
 }
 
-// One-line plain-English subtitle.
+// Subtítulo em uma linha, linguagem simples.
 export function friendlySubtitle(action: AircraftAction): string {
   switch (action) {
+    case "present":
+      return "Presente na área monitorada";
     case "entered":
-      return "New aircraft detected in the monitored area";
+      return "Nova aeronave detectada na área monitorada";
     case "left":
-      return "Aircraft flew out of the monitored area";
+      return "A aeronave deixou a área monitorada";
     case "landed":
-      return "Touched down on the ground";
+      return "Tocou o solo";
     case "took_off":
-      return "Lifted off and is now airborne";
+      return "Decolou e está no ar";
     default:
       return "";
   }
 }
 
-// User-facing category label (e.g. "Light aircraft" → "Light aircraft").
+// Rótulo amigável da categoria (ex.: "Aeronave leve").
 export function friendlyCategory(category: AircraftCategory): string {
   return categoryMeta(category).label;
 }
