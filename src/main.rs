@@ -36,7 +36,11 @@ async fn main() -> anyhow::Result<()> {
             sender: sender.clone(),
         });
 
-    let listener = TcpListener::bind("127.0.0.1:3000").await?;
+    let port: u16 = std::env::var("PORT")
+        .unwrap_or_else(|_| "3000".into())
+        .parse()?;
+
+    let listener = TcpListener::bind(("0.0.0.0", port)).await?;
 
     let poller_result = tokio::spawn(async move {
         println!("starting poller");
@@ -113,7 +117,10 @@ fn detect_events(previous: &AircraftState, current: &AircraftState) -> Vec<Aircr
         match current.get(icao) {
             Some(cur) => match cur.address == prev.address {
                 true => result.push(AircraftEvent::Present(cur.clone())),
-                false => result.push(AircraftEvent::ChangedAddress(cur.clone(), prev.address.clone())),
+                false => result.push(AircraftEvent::ChangedAddress(
+                    cur.clone(),
+                    prev.address.clone(),
+                )),
             },
             None => result.push(AircraftEvent::Left(prev.clone())),
         }
