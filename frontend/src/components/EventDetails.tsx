@@ -7,6 +7,7 @@ import {
   Clock,
   Tag,
   Compass,
+  MapPin,
   type LucideIcon,
 } from "lucide-react";
 import type { ReceivedEvent } from "@/hooks/useAirspaceStore";
@@ -62,6 +63,11 @@ export function EventDetails({ event }: EventDetailsProps) {
           <FriendlyRow icon={Compass} label="Posição">
             <span className="font-mono text-xs tabular-nums">
               {event.latitude.toFixed(4)}°, {event.longitude.toFixed(4)}°
+            </span>
+          </FriendlyRow>
+          <FriendlyRow icon={MapPin} label="Local">
+            <span className="text-xs">
+              {[event.city, event.state, event.country].filter(Boolean).join(", ") || "Localização desconhecida"}
             </span>
           </FriendlyRow>
         </div>

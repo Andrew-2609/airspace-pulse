@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, X } from "lucide-react";
 import { MetricsRow } from "./MetricsRow";
+import { Button } from "@/components/ui/button";
 import { ActiveAircraft } from "./ActiveAircraft";
 import { EventFeed } from "./EventFeed";
 import { EventDetails } from "./EventDetails";
@@ -40,6 +41,8 @@ export function MonitoringView({
     [isMobile, onOpenMobileDetails],
   );
 
+  const handleCloseDetails = useCallback(() => setSelectedEvent(null), []);
+
   const showReconnectBanner = status === "disconnected" && lastError !== null;
 
   return (
@@ -75,13 +78,23 @@ export function MonitoringView({
         <section className="hidden lg:block">
           {selectedEvent ? (
             <div className="space-y-3">
-              <header>
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                  Detalhes do evento
-                </h2>
-                <p className="mt-0.5 text-xs text-muted-foreground/80">
-                  Um resumo do que acabou de acontecer.
-                </p>
+              <header className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    Detalhes do evento
+                  </h2>
+                  <p className="mt-0.5 text-xs text-muted-foreground/80">
+                    Um resumo do que acabou de acontecer.
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleCloseDetails}
+                  aria-label="Fechar detalhes"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </header>
               <EventDetails event={selectedEvent} />
             </div>
