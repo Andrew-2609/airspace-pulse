@@ -1,4 +1,7 @@
+use std::sync::LazyLock;
+
 use axum::{Router, routing::get};
+use reverse_geocoder::ReverseGeocoder;
 use tokio::{
     net::TcpListener,
     sync::broadcast::{self, Sender},
@@ -19,6 +22,8 @@ mod opensky;
 mod state;
 
 const POLL_INTERVAL: u64 = 22;
+
+static GEOCODER: LazyLock<ReverseGeocoder> = LazyLock::new(ReverseGeocoder::new);
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -104,10 +109,10 @@ fn detect_events(previous: &AircraftState, current: &AircraftState) -> Vec<Aircr
         }
     }
 
-    for (_, ac) in previous {
-        match current.contains_key(&ac.icao24) {
-            true => result.push(AircraftEvent::Present(ac.clone())),
-            false => result.push(AircraftEvent::Left(ac.clone())),
+    for (icao, prev) in previous {
+        match current.get(icao) {
+            Some(cur) => result.push(AircraftEvent::Present(cur.clone())),
+            None => result.push(AircraftEvent::Left(prev.clone())),
         }
     }
 

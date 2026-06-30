@@ -1,5 +1,7 @@
 use serde::Serialize;
 
+use crate::GEOCODER;
+
 #[derive(Clone, Serialize)]
 pub struct Aircraft {
     pub icao24: String,
@@ -7,6 +9,17 @@ pub struct Aircraft {
     pub position: Position,
     pub on_ground: bool,
     pub category: AircraftCategory,
+}
+
+impl Aircraft {
+    pub fn address(&self) -> Address {
+        let result = GEOCODER.search((self.position.lat, self.position.lon));
+        Address {
+            city: result.record.name.clone(),
+            state: result.record.admin1.clone(),
+            country: result.record.cc.clone(),
+        }
+    }
 }
 
 #[derive(Clone, Serialize)]
@@ -73,4 +86,10 @@ impl Serialize for AircraftCategory {
             Self::Unknown(other) => serializer.serialize_str(format!("unknown{}", other).as_str()),
         }
     }
+}
+
+pub struct Address {
+    pub city: String,
+    pub state: String,
+    pub country: String,
 }
