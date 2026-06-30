@@ -85,7 +85,7 @@ async fn run_poller(sender: Sender<AircraftEvent>) -> anyhow::Result<()> {
                 previous = current;
             }
             Err(err) => {
-                println!("polling error: {}", err)
+                eprintln!("polling error: {:#}", err);
             }
         }
 
