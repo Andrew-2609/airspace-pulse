@@ -111,7 +111,10 @@ fn detect_events(previous: &AircraftState, current: &AircraftState) -> Vec<Aircr
 
     for (icao, prev) in previous {
         match current.get(icao) {
-            Some(cur) => result.push(AircraftEvent::Present(cur.clone())),
+            Some(cur) => match cur.address == prev.address {
+                true => result.push(AircraftEvent::Present(cur.clone())),
+                false => result.push(AircraftEvent::ChangedAddress(cur.clone(), prev.address.clone())),
+            },
             None => result.push(AircraftEvent::Left(prev.clone())),
         }
     }
